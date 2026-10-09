@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: silver
+    description: Validated Parquet written by elmorgon.silver. Bad days are quarantined before they get here.
+    tables:
+      - name: prices
+        meta:
+          external_location: "read_parquet('{{ env_var('ELMORGON_DATA_DIR') }}/silver/prices/*/*.parquet', hive_partitioning = true)"
+      - name: weather_archive
+        meta:
+          external_location: "read_parquet('{{ env_var('ELMORGON_DATA_DIR') }}/silver/weather_archive/*.parquet')"
+      - name: weather_forecast
+        meta:
+          external_location: "read_parquet('{{ env_var('ELMORGON_DATA_DIR') }}/silver/weather_forecast/*.parquet')"

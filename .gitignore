@@ -1,0 +1,25 @@
+# Data is rebuilt by the pipeline; only issued forecasts (forecasts/issued/) are versioned.
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# dbt
+transform/target/
+transform/logs/
+transform/dbt_packages/
+transform/.user.yml
+
+# Dagster
+.dagster/
+tmp*/

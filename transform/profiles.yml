@@ -1,0 +1,9 @@
+elmorgon:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('ELMORGON_DATA_DIR') }}/warehouse.duckdb"
+      threads: 4
+      settings:
+        TimeZone: UTC

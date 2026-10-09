@@ -1,0 +1,27 @@
+name: elmorgon
+version: "1.0.0"
+config-version: 2
+profile: elmorgon
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  elmorgon:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+    features:
+      +materialized: table
+
+seeds:
+  elmorgon:
+    swedish_holidays:
+      +column_types:
+        holiday_date: date
+        holiday_name: varchar

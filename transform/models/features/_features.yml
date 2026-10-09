@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: feat_price_hourly
+    description: >
+      Model features keyed by zone and target hour, built only from information
+      available at 10:00 on the day before delivery.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [zone, hour_start]
+    columns:
+      # 02:00 local does not exist on the spring DST day, so the lags that point
+      # at it are legitimately missing. LightGBM handles those nulls natively.
+      - name: lag_1d
+        description: Same local hour on the issue day (the most recent known day).
+        data_tests:
+          - not_null:
+              config:
+                where: "hour_local != 2"
+      - name: lag_7d
+        data_tests:
+          - not_null:
+              config:
+                where: "hour_local != 2"
+      - name: prev_day_mean
+        data_tests: [not_null]
+      - name: issue_date
+        data_tests: [not_null]

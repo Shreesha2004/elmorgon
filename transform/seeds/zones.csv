@@ -1,0 +1,5 @@
+zone,zone_name,largest_city,description
+SE1,Luleå,Luleå,"Northern Sweden: hydro and wind surplus, low demand"
+SE2,Sundsvall,Sundsvall,"North-central Sweden: hydro and wind surplus"
+SE3,Stockholm,Stockholm,"Central and southern Sweden: most of the demand, nuclear"
+SE4,Malmö,Malmö,"Southern tip: deficit area, coupled to Denmark and Germany"

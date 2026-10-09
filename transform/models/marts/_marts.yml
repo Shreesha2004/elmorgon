@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: dim_zone
+    description: The four Swedish bidding zones.
+    columns:
+      - name: zone
+        data_tests: [unique, not_null]
+
+  - name: dim_date
+    description: One row per calendar day, with Swedish public holidays.
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
+
+  - name: fct_price_interval
+    description: Day-ahead price per zone and market interval (60 or 15 minutes).
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [zone, interval_start]
+    columns:
+      - name: zone
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_zone')
+                field: zone
+      - name: delivery_date
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+      - name: resolution_minutes
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [15, 60]
+      - name: price_sek_kwh
+        data_tests: [not_null]
+
+  - name: fct_price_hourly
+    description: Hourly average price per zone (incremental).
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [zone, hour_start]
+    columns:
+      - name: n_intervals
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 4]
+
+  - name: fct_weather_hourly
+    description: Hourly weather per zone, averaged over that zone's points.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [zone, valid_at]
+
+  - name: mart_daily_zone_stats
+    description: Daily price level and intraday spread per zone.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [zone, delivery_date]
