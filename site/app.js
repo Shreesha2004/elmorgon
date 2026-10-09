@@ -563,7 +563,7 @@ function renderTomorrow(d) {
 // On narrow screens the side column stacks below everything, so the area cards move up under the intro.
 function placeAreas() {
   const block = document.getElementById("areas-block");
-  if (stackQuery.matches) document.getElementById("intro").after(block);
+  if (stackQuery.matches) document.getElementById("updates").after(block);
   else document.querySelector(".side").prepend(block);
 }
 

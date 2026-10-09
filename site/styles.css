@@ -5,7 +5,7 @@
   --page: #f3f5f8;
   --panel: #ffffff;
   --panel-2: #f7f9fb;
-  --line: #e1e6ec;
+  --line: #dce2e9;
   --line-2: #c8d0d9;
   --ink: #1b1f24;
   --ink-2: #4a5561;
@@ -101,7 +101,10 @@ main { display: grid; gap: 20px; min-width: 0; }
 
 /* Panels */
 
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.panel {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-width: 0;
+  box-shadow: 0 1px 2px rgba(23, 41, 64, 0.05), 0 4px 14px rgba(23, 41, 64, 0.05);
+}
 .panel-head {
   display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px;
   padding: 14px 20px; border-bottom: 1px solid var(--line);
@@ -120,7 +123,7 @@ h1.panel-head { font-size: 1.25rem; }
 
 .figures {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;
-  margin: 20px 0 0; padding: 0;
+  margin: 0; padding: 0;
 }
 .figures div {
   display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px;
@@ -129,8 +132,6 @@ h1.panel-head { font-size: 1.25rem; }
 .figures dd { margin: 0; font-size: 1.75rem; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .figures dt { color: var(--ink-2); font-size: var(--small); line-height: 1.35; }
 
-.schedule { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
-.schedule h2 { font-size: 0.9375rem; margin-bottom: 10px; }
 .schedule ol {
   list-style: none; margin: 0; padding: 0;
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 24px;
@@ -295,6 +296,7 @@ details.table-view summary:hover { color: var(--shell-hover); }
 .side-title { font-size: 1.0625rem; padding: 2px 4px 0; }
 .areas { display: grid; gap: 12px; }
 .area {
+  box-shadow: 0 1px 2px rgba(23, 41, 64, 0.05), 0 4px 14px rgba(23, 41, 64, 0.05);
   display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: baseline;
   width: 100%; padding: 14px 16px 10px; text-align: left;
   font: inherit; color: var(--ink);
