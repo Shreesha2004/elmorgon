@@ -378,19 +378,34 @@ function renderTimetable(d) {
   };
 }
 
+const average = (values) => (values.length ? values.reduce((s, v) => s + v, 0) / values.length : null);
+
+// Every area at a glance: the latest actual daily average beside tomorrow's forecast average.
+// Market intervals within a day are equal in length, so a plain mean is the daily average.
 function renderZonePicker(d) {
   const picker = document.getElementById("zone-picker");
+  const actual = d.latest_actual;
+  const head = (id, label, iso) => {
+    document.getElementById(id).replaceChildren(label, el("br"), el("small", { text: shortDay(iso) }));
+  };
+  if (actual) head("zone-head-actual", "Actual", actual.date);
+  head("zone-head-forecast", "Forecast", d.tomorrow.date);
   for (const z of ZONES) {
-    const hours = d.tomorrow.zones[z];
-    const mean = hours.reduce((s, h) => s + h.q50, 0) / hours.length;
+    const forecast = average(d.tomorrow.zones[z].map((h) => h.q50));
+    const known = actual && actual.zones[z] ? average(actual.zones[z].map((p) => p.price)) : null;
     const input = el("input", { type: "radio", name: "zone", value: z });
     if (z === state.zone) input.checked = true;
     input.addEventListener("change", () => selectZone(z));
     picker.append(el("label", {}, [
       input,
       el("span", { class: `badge ${z}`, text: z }),
-      el("span", { text: ZONE_NAMES[z] }),
-      el("span", { class: "zone-stat num", text: `avg ${price(mean)}` }),
+      el("span", { class: "zone-name", text: ZONE_NAMES[z] }),
+      el("span", { class: "zone-stat num" }, [
+        el("span", { class: "visually-hidden", text: "Actual " }), price(known),
+      ]),
+      el("span", { class: "zone-stat num forecast" }, [
+        el("span", { class: "visually-hidden", text: "Forecast " }), price(forecast),
+      ]),
     ]));
   }
 }

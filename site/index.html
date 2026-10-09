@@ -37,6 +37,18 @@
   </header>
 
   <main>
+    <aside class="notice" aria-labelledby="notice-title">
+      <div class="wrap">
+        <h2 id="notice-title">When this page updates</h2>
+        <ol class="day-plan">
+          <li><time class="num">10:00</time><span>Elmorgon issues its forecast for tomorrow and this page is rebuilt.</span></li>
+          <li><time class="num">12:00</time><span>Nord Pool's day-ahead auction for tomorrow closes.</span></li>
+          <li><time class="num">13:00</time><span>Nord Pool publishes tomorrow's prices. They are shown and scored here at the next morning's update.</span></li>
+        </ol>
+        <p class="notice-note">Times are Stockholm time; in winter the morning update runs at 09:00. All prices are spot prices in SEK/kWh, without energy tax, VAT, electricity certificates, surcharges or grid fees.</p>
+      </div>
+    </aside>
+
     <section id="accuracy" aria-labelledby="claim">
       <div class="wrap">
         <div class="intro">
@@ -90,7 +102,12 @@
 
           <div class="zone-detail">
             <fieldset class="zone-picker" id="zone-picker">
-              <legend>Zone</legend>
+              <legend>Price areas, daily average in SEK/kWh</legend>
+              <div class="zone-head" aria-hidden="true">
+                <span>Area</span>
+                <span class="num" id="zone-head-actual">Actual</span>
+                <span class="num" id="zone-head-forecast">Forecast</span>
+              </div>
             </fieldset>
             <div>
               <div class="chart-head">
@@ -107,6 +124,28 @@
                 <div class="scroll-x"><table class="data-table" id="zone-table"></table></div>
               </details>
             </div>
+          </div>
+
+          <div class="sources">
+            <h3>Where the information comes from</h3>
+            <dl>
+              <div>
+                <dt>Prices</dt>
+                <dd>Nord Pool day-ahead prices for the four Swedish price areas, collected from <a href="https://www.elprisetjustnu.se/">elprisetjustnu.se</a>, which converts them from euros to kronor. The market cleared hourly until 30 September 2025 and in 15-minute intervals since; the forecast is for the hourly average.</dd>
+              </div>
+              <div>
+                <dt>Weather</dt>
+                <dd>Forecasts of temperature, wind, sunshine and cloud cover at two places in each area, from <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0).</dd>
+              </div>
+              <div>
+                <dt>Forecast</dt>
+                <dd>Made by Elmorgon's own model, retrained every morning on all prices published so far. It is not a Nord Pool figure, and it is saved before the real prices exist.</dd>
+              </div>
+              <div>
+                <dt>Not included</dt>
+                <dd>Energy tax, VAT, electricity certificates, supplier surcharges and grid fees. Prices are rounded to two decimals, so totals can differ slightly.</dd>
+              </div>
+            </dl>
           </div>
         </div>
       </div>
