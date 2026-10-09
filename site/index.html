@@ -9,7 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2317457a'/%3E%3Crect x='7' y='8' width='18' height='3' rx='1.5' fill='%23fff'/%3E%3Crect x='7' y='14.5' width='12' height='3' rx='1.5' fill='%23fff'/%3E%3Crect x='7' y='21' width='8' height='3' rx='1.5' fill='%23c6d6e9'/%3E%3C/svg%3E">
   <link rel="preload" href="fonts/FiraSans-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/FiraSansCondensed-500.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <header class="shell">
@@ -37,25 +37,20 @@
   </header>
 
   <main>
-    <aside class="notice" aria-labelledby="notice-title">
-      <div class="wrap">
-        <div class="notice-box">
-        <h2 id="notice-title">When this page updates</h2>
-        <ol class="day-plan">
-          <li><time class="num">10:00</time><span>Elmorgon issues its forecast for tomorrow and this page is rebuilt.</span></li>
-          <li><time class="num">12:00</time><span>Nord Pool's day-ahead auction for tomorrow closes.</span></li>
-          <li><time class="num">13:00</time><span>Nord Pool publishes tomorrow's prices. They are shown and scored here at the next morning's update.</span></li>
-        </ol>
-        <p class="notice-note">Times are Stockholm time; in winter the morning update runs at 09:00. All prices are spot prices in SEK/kWh, without energy tax, VAT, electricity certificates, surcharges or grid fees.</p>
-        </div>
-      </div>
-    </aside>
-
     <section id="accuracy" aria-labelledby="claim">
       <div class="wrap">
-        <div class="intro">
+        <div class="intro-box">
           <h1>Tomorrow's electricity price in Sweden, forecast hour by hour.</h1>
-          <p class="lede">Each morning, before Nord Pool's day-ahead auction closes at 12:00, Elmorgon forecasts the next day's prices for Sweden's four price zones. Here is how it does against the obvious guess.</p>
+          <div class="intro-body">
+            <p class="lede">Each morning, before Nord Pool's day-ahead auction closes at 12:00, Elmorgon forecasts the next day's prices for Sweden's four price zones. Here is how it does against the obvious guess.</p>
+            <h2 class="plan-title">When this page updates</h2>
+            <ol class="day-plan">
+              <li><time class="num">10:00</time><span>Elmorgon issues its forecast for tomorrow and this page is rebuilt.</span></li>
+              <li><time class="num">12:00</time><span>Nord Pool's day-ahead auction for tomorrow closes.</span></li>
+              <li><time class="num">13:00</time><span>Nord Pool publishes tomorrow's prices. They are shown and scored here at the next morning's update.</span></li>
+            </ol>
+            <p class="notice-note">Times are Stockholm time; in winter the morning update runs at 09:00. All prices are spot prices in SEK/kWh, without energy tax, VAT, electricity certificates, surcharges or grid fees.</p>
+          </div>
         </div>
         <div class="proof">
           <div>
@@ -218,6 +213,6 @@
   </footer>
 
   <noscript><p class="wrap load-error">This page draws its tables and charts with JavaScript. The raw numbers are in <a href="data/dashboard.json">data/dashboard.json</a>.</p></noscript>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=3" defer></script>
 </body>
 </html>
