@@ -204,4 +204,4 @@ baseline) is a floor, and the live record is the real test.
 
 Day-ahead prices come from Nord Pool via [elprisetjustnu.se](https://www.elprisetjustnu.se/),
 and weather from [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). The dashboard uses the
-Barlow font (SIL Open Font License). The code is MIT licensed.
+Fira Sans font (SIL Open Font License). The code is MIT licensed.

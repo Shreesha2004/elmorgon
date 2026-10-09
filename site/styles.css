@@ -1,9 +1,9 @@
-@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("fonts/Barlow-400.woff2") format("woff2"); }
-@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url("fonts/Barlow-500.woff2") format("woff2"); }
-@font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url("fonts/Barlow-600.woff2") format("woff2"); }
-@font-face { font-family: "Barlow"; font-weight: 700; font-display: swap; src: url("fonts/Barlow-700.woff2") format("woff2"); }
-@font-face { font-family: "Barlow Semi Condensed"; font-weight: 500; font-display: swap; src: url("fonts/BarlowSemiCondensed-500.woff2") format("woff2"); }
-@font-face { font-family: "Barlow Semi Condensed"; font-weight: 600; font-display: swap; src: url("fonts/BarlowSemiCondensed-600.woff2") format("woff2"); }
+@font-face { font-family: "Fira Sans"; font-weight: 400; font-display: swap; src: url("fonts/FiraSans-400.woff2") format("woff2"); }
+@font-face { font-family: "Fira Sans"; font-weight: 500; font-display: swap; src: url("fonts/FiraSans-500.woff2") format("woff2"); }
+@font-face { font-family: "Fira Sans"; font-weight: 600; font-display: swap; src: url("fonts/FiraSans-600.woff2") format("woff2"); }
+@font-face { font-family: "Fira Sans"; font-weight: 700; font-display: swap; src: url("fonts/FiraSans-700.woff2") format("woff2"); }
+@font-face { font-family: "Fira Sans Condensed"; font-weight: 500; font-display: swap; src: url("fonts/FiraSansCondensed-500.woff2") format("woff2"); }
+@font-face { font-family: "Fira Sans Condensed"; font-weight: 600; font-display: swap; src: url("fonts/FiraSansCondensed-600.woff2") format("woff2"); }
 
 :root {
   color-scheme: light;
@@ -42,8 +42,8 @@
   --p5: #2f64a3;
   --p6: #17457a;
 
-  --sans: "Barlow", "Segoe UI", system-ui, sans-serif;
-  --figures: "Barlow Semi Condensed", "Barlow", "Segoe UI", system-ui, sans-serif;
+  --sans: "Fira Sans", "Segoe UI", system-ui, sans-serif;
+  --figures: "Fira Sans Condensed", "Fira Sans", "Segoe UI", system-ui, sans-serif;
 
   --step--1: 0.8125rem;
   --step-0: 1rem;
@@ -117,21 +117,22 @@ html { scrollbar-color: var(--rule-strong) var(--paper-2); }
 }
 .freshness strong { color: var(--shell-ink); font-weight: 600; }
 
-/* Update notice: the day's events, set like departures on a timetable. */
+/* Update notice: a boxed panel at the top, with the day's events set like departures. */
 
-.notice { background: var(--paper-2); border-bottom: 1px solid var(--rule); }
-.notice .wrap {
-  display: grid; grid-template-columns: auto 1fr; align-items: baseline;
-  gap: 6px 32px; padding-top: 14px; padding-bottom: 16px;
+.notice { padding-top: 20px; }
+.notice-box { border: 1px solid var(--rule-strong); border-radius: 12px; background: var(--paper); }
+.notice h2 {
+  font-size: var(--step-0); line-height: 1.4; letter-spacing: 0;
+  padding: 12px 18px; border-bottom: 1px solid var(--rule);
+  background: var(--paper-2); border-radius: 11px 11px 0 0;
 }
-.notice h2 { font-size: var(--step-0); line-height: 1.45; letter-spacing: 0; }
 .day-plan {
-  list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 28px;
+  list-style: none; margin: 0; padding: 14px 18px 4px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 28px;
 }
 .day-plan li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; font-size: 0.9375rem; line-height: 1.45; }
 .day-plan time { color: var(--shell); font-size: var(--step-1); font-weight: 600; }
-.notice-note { grid-column: 2; color: var(--ink-2); font-size: var(--step--1); }
+.notice-note { padding: 6px 18px 14px; color: var(--ink-2); font-size: var(--step--1); }
 
 /* Sections */
 
@@ -160,7 +161,7 @@ p { margin: 0; }
 }
 .claim {
   font-size: clamp(2.125rem, 1.15rem + 2.5vw, 3.125rem); font-weight: 600; line-height: 1.08;
-  letter-spacing: -0.025em; max-width: 21ch;
+  letter-spacing: -0.015em; max-width: 21ch;
 }
 .claim-support { margin-top: 16px; color: var(--ink-2); max-width: 54ch; }
 
@@ -405,8 +406,6 @@ footer strong { color: var(--ink); font-weight: 600; }
   .claim { max-width: 18ch; }
   .zone-detail { grid-template-columns: 1fr; gap: 20px; }
   .zone-picker { max-width: 34rem; }
-  .notice .wrap { grid-template-columns: 1fr; }
-  .notice-note { grid-column: 1; }
   .sources dl { grid-template-columns: 1fr; }
   .value-grid { grid-template-columns: 1fr; gap: 40px; }
 }
