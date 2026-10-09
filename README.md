@@ -47,18 +47,25 @@ What the forecast is worth, using spot prices only (no grid fees, tax or VAT):
 For a commuter charging 10 kWh a night, planning with Elmorgon saves about 1,230 SEK a year
 compared with plugging in at 18:00.
 
-### The next day as a timetable
+### The dashboard
 
-The dashboard shows each price area's forecast hour by hour, with all four areas side by side;
-darker cells are more expensive, and the three cheapest hours in each area are marked.
+The page is a set of panels: what Elmorgon does, the key figures, and when the page updates
+(10:00 forecast, 12:00 auction close, 13:00 prices published). Beside them, the four price
+areas each have a card with tomorrow's forecast average, the latest actual price and the shape
+of tomorrow; clicking a card switches the hourly chart. A panel at the side explains where the
+data comes from and what the prices leave out.
 
-![Next-day forecast as a timetable](docs/screenshots/timetable.png)
+Below that, all four areas are laid out hour by hour. Darker cells are more expensive, and the
+three cheapest hours in each area are marked.
+
+![All four price areas, every hour of the next day](docs/screenshots/timetable.png)
 
 ### Live record
 
 Every live forecast is scored once its prices are published. The record starts on 4 October
-2026, and on that first day Elmorgon lost to "repeat the day before" (0.145 vs 0.135 SEK/kWh).
-The dashboard shows that as it happened. One day says very little; the record grows daily.
+2026. Elmorgon lost to "repeat the day before" on both of its first two scored days (4 and 5
+October), and the dashboard shows that as it happened. Two days say very little; the record
+grows daily.
 
 ## How it works
 

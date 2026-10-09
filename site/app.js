@@ -309,12 +309,18 @@ function renderTimetable(d) {
   };
 
   const blockStart = (c, i) => i > 0 && [6, 12, 18].includes(c.hour) && !c.label.endsWith("b");
-  if (!pocket) {
-    table.append(el("colgroup", {}, [el("col", { class: "col-zone" }), ...cols.map(() => el("col"))]));
-    table.append(el("thead", {}, el("tr", {}, [
-      el("th", { scope: "col", text: "Area" }),
-      ...cols.map((c, i) => el("th", { scope: "col", text: c.label, class: blockStart(c, i) ? "block" : "" })),
+  const validBand = (span) => el("tr", { class: "valid" }, el("th", { colspan: span, scope: "colgroup" },
+    el("div", { class: "valid-row" }, [
+      el("strong", { text: `Valid for ${longDay(t.date)}` }),
+      el("span", { text: `Issued ${shortDay(t.issued_at)} at ${clock(t.issued_at)}, before these prices were published` }),
     ])));
+  if (!pocket) {
+    // Column widths come from <col>: with a fixed layout the first row (the band) would set them.
+    table.append(el("colgroup", {}, [el("col", { class: "col-zone" }), ...cols.map(() => el("col"))]));
+    table.append(el("thead", {}, [validBand(cols.length + 1), el("tr", {}, [
+      el("th", { scope: "col", text: "Zone" }),
+      ...cols.map((c, i) => el("th", { scope: "col", text: c.label, class: blockStart(c, i) ? "block" : "" })),
+    ])]));
     const body = el("tbody");
     for (const z of ZONES) {
       body.append(el("tr", {}, [
@@ -331,10 +337,10 @@ function renderTimetable(d) {
     table.append(body);
   } else {
     table.append(el("colgroup", {}, [el("col", { class: "col-hour" }), ...ZONES.map(() => el("col"))]));
-    table.append(el("thead", {}, el("tr", {}, [
+    table.append(el("thead", {}, [validBand(ZONES.length + 1), el("tr", {}, [
       el("th", { scope: "col", text: "Hour" }),
       ...ZONES.map((z) => el("th", { scope: "col" }, el("span", { class: `badge ${z}`, text: z }))),
-    ])));
+    ])]));
     const body = el("tbody");
     cols.forEach((c, i) => {
       body.append(el("tr", { class: blockStart(c, i) ? "block-row" : "" },
@@ -449,8 +455,8 @@ function renderZoneChart(d) {
   const hours = t.zones[z];
   const today = todayByClock(d, z);
   const res = (d.latest_actual && d.latest_actual.resolution_minutes) || 60;
-  setText("zone-chart-title", `${z} ${ZONE_NAMES[z]}, SEK/kWh`);
-  setText("today-key", `Actual ${latestLabel()} (${res}-minute)`);
+  setText("zone-chart-title", `${z} ${ZONE_NAMES[z]}: forecast range by hour, SEK/kWh`);
+  setText("today-key", `Day before: actual price ${latestLabel()}, ${res}-minute`);
 
   const host = document.getElementById("zone-chart");
   host.replaceChildren();
@@ -499,12 +505,6 @@ function renderZoneChart(d) {
     svg("path", { d: d2, fill: "none", stroke: "var(--series-day-before)", "stroke-width": 1.5, "stroke-linejoin": "round" }, root);
   }
   svg("path", { d: step("q50"), fill: "none", stroke: "var(--series-elmorgon)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, root);
-
-  // Tomorrow's average as a dashed reference line, as on Octopus Agile's price chart.
-  const mean = average(hours.map((h) => h.q50));
-  const avg = svg("g", { class: "average" }, root);
-  svg("line", { x1: M.l, x2: W - M.r, y1: y(mean), y2: y(mean) }, avg);
-  svg("text", { x: W - M.r, y: y(mean) - 6, "text-anchor": "end" }, avg).textContent = `Average ${price(mean)}`;
 
   const cross = svg("line", { class: "crosshair", y1: M.t, y2: H - M.b, visibility: "hidden" }, root);
   host.append(root);
@@ -754,7 +754,7 @@ function watchSections() {
       if (link) link.setAttribute("aria-current", "true");
     }
   }, { rootMargin: "-45% 0px -50% 0px" });
-  document.querySelectorAll("main > section[id]").forEach((s) => observer.observe(s));
+  document.querySelectorAll("main section.panel[id]").forEach((s) => observer.observe(s));
 }
 
 /* Boot */
