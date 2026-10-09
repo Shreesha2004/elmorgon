@@ -6,6 +6,7 @@ const TZ = "Europe/Stockholm";
 const SVG_NS = "http://www.w3.org/2000/svg";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const pocketQuery = window.matchMedia("(max-width: 720px)");
+const stackQuery = window.matchMedia("(max-width: 1100px)");
 
 const state = { data: null, zone: "SE3" };
 
@@ -131,6 +132,9 @@ function renderClaim(d) {
   const ours = bt.overall.gbm;
   const base = bt.overall.naive_day;
   setText("claim", `Elmorgon's forecasts miss by ${pct(ours.skill_vs_naive_day)} less than repeating the day before.`);
+  setText("fig-skill", pct(ours.skill_vs_naive_day));
+  setText("fig-days", count(bt.period.days));
+  setText("fig-coverage", pct(ours.coverage_80));
   const from = fmtDay(dateFrom(bt.period.first_day), { month: "long", year: "numeric" });
   const to = fmtDay(dateFrom(bt.period.last_day), { month: "long", year: "numeric" });
   setText("claim-support",
@@ -305,19 +309,12 @@ function renderTimetable(d) {
   };
 
   const blockStart = (c, i) => i > 0 && [6, 12, 18].includes(c.hour) && !c.label.endsWith("b");
-  const validBand = (span) => el("tr", { class: "valid" }, el("th", { colspan: span, scope: "colgroup" },
-    el("div", { class: "valid-row" }, [
-      el("strong", { text: `Valid for ${longDay(t.date)}` }),
-      el("span", { text: `Issued ${shortDay(t.issued_at)} at ${clock(t.issued_at)}, before these prices were published` }),
-    ])));
-
   if (!pocket) {
-    // Column widths come from <col>: with a fixed layout the first row (the band) would set them.
     table.append(el("colgroup", {}, [el("col", { class: "col-zone" }), ...cols.map(() => el("col"))]));
-    table.append(el("thead", {}, [validBand(cols.length + 1), el("tr", {}, [
-      el("th", { scope: "col", text: "Zone" }),
+    table.append(el("thead", {}, el("tr", {}, [
+      el("th", { scope: "col", text: "Area" }),
       ...cols.map((c, i) => el("th", { scope: "col", text: c.label, class: blockStart(c, i) ? "block" : "" })),
-    ])]));
+    ])));
     const body = el("tbody");
     for (const z of ZONES) {
       body.append(el("tr", {}, [
@@ -334,10 +331,10 @@ function renderTimetable(d) {
     table.append(body);
   } else {
     table.append(el("colgroup", {}, [el("col", { class: "col-hour" }), ...ZONES.map(() => el("col"))]));
-    table.append(el("thead", {}, [validBand(ZONES.length + 1), el("tr", {}, [
+    table.append(el("thead", {}, el("tr", {}, [
       el("th", { scope: "col", text: "Hour" }),
       ...ZONES.map((z) => el("th", { scope: "col" }, el("span", { class: `badge ${z}`, text: z }))),
-    ])]));
+    ])));
     const body = el("tbody");
     cols.forEach((c, i) => {
       body.append(el("tr", { class: blockStart(c, i) ? "block-row" : "" },
@@ -355,7 +352,7 @@ function renderTimetable(d) {
   else requestAnimationFrame(() => requestAnimationFrame(paint));
 
   // The tooltip lives outside the scrolling wrapper, so its overflow can never clip it.
-  const host = document.getElementById("tomorrow-body");
+  const host = document.getElementById("timetable-body");
   if (!host._tip) {
     host.style.position = "relative";
     host._tip = makeTooltip(host);
@@ -380,42 +377,58 @@ function renderTimetable(d) {
 
 const average = (values) => (values.length ? values.reduce((s, v) => s + v, 0) / values.length : null);
 
-// Every area at a glance: the latest actual daily average beside tomorrow's forecast average.
-// Market intervals within a day are equal in length, so a plain mean is the daily average.
-function renderZonePicker(d) {
-  const picker = document.getElementById("zone-picker");
+// A small step line of tomorrow's forecast, on a scale shared by all four cards.
+function sparkline(values, color, hi) {
+  const W = 300, H = 44;
+  const x = linear(0, values.length, 0, W);
+  const y = linear(Math.min(0, ...values), hi, H - 2, 3);
+  const line = values.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}L${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none", "aria-hidden": "true" });
+  svg("path", { d: `${line}L${W},${H}L0,${H}Z`, fill: color, "fill-opacity": 0.12 }, root);
+  svg("path", { d: line, fill: "none", stroke: color, "stroke-width": 1.5, "vector-effect": "non-scaling-stroke" }, root);
+  return root;
+}
+
+// The four price areas, as on statsskuld.se: tomorrow's forecast average, the latest actual
+// average and the shape of tomorrow. Market intervals in a day are equal, so a plain mean
+// is the daily average.
+function renderAreas(d) {
+  const t = d.tomorrow;
   const actual = d.latest_actual;
-  const head = (id, label, iso) => {
-    document.getElementById(id).replaceChildren(label, el("br"), el("small", { text: shortDay(iso) }));
-  };
-  if (actual) head("zone-head-actual", "Actual", actual.date);
-  head("zone-head-forecast", "Forecast", d.tomorrow.date);
+  const box = document.getElementById("areas");
+  const tabs = document.getElementById("area-tabs");
+  const hi = t ? Math.max(...ZONES.flatMap((z) => t.zones[z].map((h) => h.q50))) : 1;
   for (const z of ZONES) {
-    const forecast = average(d.tomorrow.zones[z].map((h) => h.q50));
+    const forecast = t ? average(t.zones[z].map((h) => h.q50)) : null;
     const known = actual && actual.zones[z] ? average(actual.zones[z].map((p) => p.price)) : null;
-    const input = el("input", { type: "radio", name: "zone", value: z });
-    if (z === state.zone) input.checked = true;
-    input.addEventListener("change", () => selectZone(z));
-    picker.append(el("label", {}, [
-      input,
-      el("span", { class: `badge ${z}`, text: z }),
-      el("span", { class: "zone-name", text: ZONE_NAMES[z] }),
-      el("span", { class: "zone-stat num" }, [
-        el("span", { class: "visually-hidden", text: "Actual " }), price(known),
+    const card = el("button", { type: "button", class: "area", "data-zone": z, "aria-pressed": String(z === state.zone) }, [
+      el("span", { class: "area-name" }, [el("span", { class: `badge ${z}`, text: z }), ZONE_NAMES[z]]),
+      el("span", { class: "area-price" }, [price(forecast), el("small", { text: "SEK/kWh" })]),
+      el("span", { class: "area-sub" }, [
+        el("span", { text: t ? `Forecast, ${shortDay(t.date)}` : "No forecast yet" }),
+        el("span", { text: actual ? `Actual ${shortDay(actual.date)}: ${price(known)}` : "" }),
       ]),
-      el("span", { class: "zone-stat num forecast" }, [
-        el("span", { class: "visually-hidden", text: "Forecast " }), price(forecast),
-      ]),
-    ]));
+    ]);
+    if (t) card.append(sparkline(t.zones[z].map((h) => h.q50), `var(--${z.toLowerCase()})`, hi));
+    card.addEventListener("click", () => selectZone(z, true));
+    box.append(card);
+    if (t) {
+      const tab = el("button", { type: "button", class: "tab", "data-zone": z, "aria-pressed": String(z === state.zone) },
+        [el("span", { class: `badge ${z}`, text: z }), ZONE_NAMES[z]]);
+      tab.addEventListener("click", () => selectZone(z));
+      tabs.append(tab);
+    }
   }
 }
 
 function selectZone(z, scroll = false) {
   state.zone = z;
-  const input = document.querySelector(`#zone-picker input[value="${z}"]`);
-  if (input) input.checked = true;
+  for (const button of document.querySelectorAll("button[data-zone]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.zone === z));
+  }
+  if (!state.data.tomorrow) return;
   renderZoneChart(state.data);
-  if (scroll) document.getElementById("zone-picker").scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest" });
+  if (scroll) document.getElementById("tomorrow").scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
 }
 
 // The latest published delivery day: "today" at the 10:00 issue time, named by date
@@ -436,8 +449,8 @@ function renderZoneChart(d) {
   const hours = t.zones[z];
   const today = todayByClock(d, z);
   const res = (d.latest_actual && d.latest_actual.resolution_minutes) || 60;
-  setText("zone-chart-title", `${z} ${ZONE_NAMES[z]}: forecast range by hour, SEK/kWh`);
-  setText("today-key", `Day before: actual price ${latestLabel()}, ${res}-minute`);
+  setText("zone-chart-title", `${z} ${ZONE_NAMES[z]}, SEK/kWh`);
+  setText("today-key", `Actual ${latestLabel()} (${res}-minute)`);
 
   const host = document.getElementById("zone-chart");
   host.replaceChildren();
@@ -487,6 +500,12 @@ function renderZoneChart(d) {
   }
   svg("path", { d: step("q50"), fill: "none", stroke: "var(--series-elmorgon)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, root);
 
+  // Tomorrow's average as a dashed reference line, as on Octopus Agile's price chart.
+  const mean = average(hours.map((h) => h.q50));
+  const avg = svg("g", { class: "average" }, root);
+  svg("line", { x1: M.l, x2: W - M.r, y1: y(mean), y2: y(mean) }, avg);
+  svg("text", { x: W - M.r, y: y(mean) - 6, "text-anchor": "end" }, avg).textContent = `Average ${price(mean)}`;
+
   const cross = svg("line", { class: "crosshair", y1: M.t, y2: H - M.b, visibility: "hidden" }, root);
   host.append(root);
   const tip = makeTooltip(host);
@@ -528,15 +547,24 @@ function renderZoneChart(d) {
 
 function renderTomorrow(d) {
   const t = d.tomorrow;
+  renderAreas(d);
   if (!t) {
     document.getElementById("tomorrow-body").replaceChildren(el("p", { class: "empty",
       text: "No forecast has been issued yet. The next one is made at 10:00 Stockholm time, before the auction closes at 12:00." }));
+    document.getElementById("all-areas").hidden = true;
     return;
   }
+  setText("tomorrow-meta", `For ${longDay(t.date)}, issued ${shortDay(t.issued_at)} at ${clock(t.issued_at)}, before the prices were published`);
   renderTimetable(d);
-  renderZonePicker(d);
   renderZoneChart(d);
   pocketQuery.addEventListener("change", () => renderTimetable(d));
+}
+
+// On narrow screens the side column stacks below everything, so the area cards move up under the intro.
+function placeAreas() {
+  const block = document.getElementById("areas-block");
+  if (stackQuery.matches) document.getElementById("intro").after(block);
+  else document.querySelector(".side").prepend(block);
 }
 
 /* Value */
@@ -717,7 +745,7 @@ function markOverflow() {
 /* Section highlight in the shell */
 
 function watchSections() {
-  const links = new Map([...document.querySelectorAll(".shell nav a")].map((a) => [a.getAttribute("href").slice(1), a]));
+  const links = new Map([...document.querySelectorAll(".top nav a")].map((a) => [a.getAttribute("href").slice(1), a]));
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
@@ -726,7 +754,7 @@ function watchSections() {
       if (link) link.setAttribute("aria-current", "true");
     }
   }, { rootMargin: "-45% 0px -50% 0px" });
-  document.querySelectorAll("main section").forEach((s) => observer.observe(s));
+  document.querySelectorAll("main > section[id]").forEach((s) => observer.observe(s));
 }
 
 /* Boot */
@@ -754,15 +782,9 @@ async function main() {
   renderRecord(d);
   renderSteps(d);
   watchSections();
-  const toggle = document.getElementById("monthly-toggle");
-  const numbers = document.getElementById("monthly-numbers");
-  toggle.addEventListener("click", () => {
-    const open = toggle.getAttribute("aria-expanded") !== "true";
-    toggle.setAttribute("aria-expanded", String(open));
-    toggle.textContent = open ? "Hide the numbers" : "Show the numbers";
-    numbers.hidden = !open;
-    markOverflow();
-  });
+  placeAreas();
+  stackQuery.addEventListener("change", placeAreas);
+  for (const details of document.querySelectorAll("details")) details.addEventListener("toggle", markOverflow);
   markOverflow();
   let width = window.innerWidth;
   let timer;

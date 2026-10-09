@@ -49,8 +49,8 @@ compared with plugging in at 18:00.
 
 ### The next day as a timetable
 
-The dashboard lays out each forecast like a printed SL timetable: zones are lines, hours are
-columns, darker cells are more expensive, and the three cheapest hours in each zone are marked.
+The dashboard shows each price area's forecast hour by hour, with all four areas side by side;
+darker cells are more expensive, and the three cheapest hours in each area are marked.
 
 ![Next-day forecast as a timetable](docs/screenshots/timetable.png)
 
@@ -203,5 +203,4 @@ baseline) is a floor, and the live record is the real test.
 ## Data and license
 
 Day-ahead prices come from Nord Pool via [elprisetjustnu.se](https://www.elprisetjustnu.se/),
-and weather from [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). The dashboard uses the
-Fira Sans font (SIL Open Font License). The code is MIT licensed.
+and weather from [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). The code is MIT licensed.

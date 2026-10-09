@@ -4,18 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Elmorgon: Swedish day-ahead price forecast</title>
-  <meta name="description" content="Tomorrow's electricity price for Sweden's four price zones, forecast before the Nord Pool auction closes, tested against simple baselines and priced in SEK.">
+  <meta name="description" content="Tomorrow's electricity price for Sweden's four price areas, forecast before the Nord Pool auction closes, tested against simple baselines and priced in SEK.">
   <meta name="theme-color" content="#17457a">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2317457a'/%3E%3Crect x='7' y='8' width='18' height='3' rx='1.5' fill='%23fff'/%3E%3Crect x='7' y='14.5' width='12' height='3' rx='1.5' fill='%23fff'/%3E%3Crect x='7' y='21' width='8' height='3' rx='1.5' fill='%23c6d6e9'/%3E%3C/svg%3E">
-  <link rel="preload" href="fonts/FiraSans-600.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/FiraSansCondensed-500.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
-  <header class="shell">
+  <header class="top">
     <div class="wrap">
-      <a class="wordmark" href="#accuracy" aria-label="Elmorgon, back to top">
-        <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+      <a class="wordmark" href="#intro" aria-label="Elmorgon, back to top">
+        <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
           <rect x="1" y="1" width="30" height="30" rx="7" fill="none" stroke="#fff" stroke-width="2"/>
           <rect x="7" y="8" width="18" height="3" rx="1.5" fill="#fff"/>
           <rect x="7" y="14.5" width="12" height="3" rx="1.5" fill="#fff"/>
@@ -25,8 +23,8 @@
       </a>
       <nav aria-label="Sections">
         <ul>
-          <li><a href="#accuracy">Accuracy</a></li>
           <li><a href="#tomorrow">Tomorrow</a></li>
+          <li><a href="#accuracy">Accuracy</a></li>
           <li><a href="#value">Value</a></li>
           <li><a href="#record">Live record</a></li>
           <li><a href="#built">How it's built</a></li>
@@ -36,183 +34,167 @@
     </div>
   </header>
 
-  <main>
-    <section id="accuracy" aria-labelledby="claim">
-      <div class="wrap">
-        <div class="intro-box">
-          <h1>Tomorrow's electricity price in Sweden, forecast hour by hour.</h1>
-          <div class="intro-body">
-            <p class="lede">Each morning, before Nord Pool's day-ahead auction closes at 12:00, Elmorgon forecasts the next day's prices for Sweden's four price zones. Here is how it does against the obvious guess.</p>
-            <h2 class="plan-title">When this page updates</h2>
-            <ol class="day-plan">
-              <li><time class="num">10:00</time><span>Elmorgon issues its forecast for tomorrow and this page is rebuilt.</span></li>
-              <li><time class="num">12:00</time><span>Nord Pool's day-ahead auction for tomorrow closes.</span></li>
-              <li><time class="num">13:00</time><span>Nord Pool publishes tomorrow's prices. They are shown and scored here at the next morning's update.</span></li>
+  <div class="wrap layout">
+    <main>
+      <section class="panel" id="intro" aria-labelledby="intro-title">
+        <h1 class="panel-head" id="intro-title">Tomorrow's electricity price in Sweden, forecast hour by hour</h1>
+        <div class="panel-body intro">
+          <p class="lede">Every morning, before Nord Pool's day-ahead auction closes at 12:00, Elmorgon forecasts each hour of the next day for Sweden's four price areas, and checks itself against the obvious guess: the same prices as the day before.</p>
+          <dl class="figures">
+            <div><dt>Less error than repeating the day before</dt><dd id="fig-skill">&nbsp;</dd></div>
+            <div><dt>Days tested, never seen in training</dt><dd id="fig-days">&nbsp;</dd></div>
+            <div><dt>Actual prices inside the 80% range</dt><dd id="fig-coverage">&nbsp;</dd></div>
+          </dl>
+          <div class="schedule">
+            <h2>When this page updates</h2>
+            <ol>
+              <li><time>10:00</time><span>Elmorgon issues the forecast for tomorrow and rebuilds this page.</span></li>
+              <li><time>12:00</time><span>Nord Pool's day-ahead auction for tomorrow closes.</span></li>
+              <li><time>13:00</time><span>Nord Pool publishes tomorrow's prices; they are scored here at the next morning's update.</span></li>
             </ol>
-            <p class="notice-note">Times are Stockholm time; in winter the morning update runs at 09:00. All prices are spot prices in SEK/kWh, without energy tax, VAT, electricity certificates, surcharges or grid fees.</p>
+            <p class="note">Stockholm time; in winter the morning update runs at 09:00. Spot prices in SEK/kWh, without energy tax, VAT, electricity certificates, surcharges or grid fees.</p>
           </div>
         </div>
-        <div class="proof">
-          <div>
-            <p class="claim" id="claim">Loading the backtest</p>
-            <p class="claim-support" id="claim-support"></p>
-          </div>
-          <div>
-            <table class="ranked" id="ranked">
-              <caption>Average error per model</caption>
-            </table>
-            <p class="ranked-note" id="ranked-note"></p>
-          </div>
+      </section>
+
+      <section class="panel" id="tomorrow" aria-labelledby="tomorrow-title">
+        <div class="panel-head">
+          <h2 id="tomorrow-title">Tomorrow, hour by hour</h2>
+          <p class="panel-meta" id="tomorrow-meta"></p>
         </div>
-        <div class="monthly">
+        <div class="panel-body" id="tomorrow-body">
+          <div class="tabs" id="area-tabs" role="group" aria-label="Price area"></div>
           <div class="chart-head">
-            <h2 class="visually-hidden">Error by month</h2>
+            <h3 id="zone-chart-title">Forecast by hour</h3>
+            <ul class="legend">
+              <li><i class="key band"></i>80% range</li>
+              <li><i class="key elmorgon"></i>Forecast</li>
+              <li><i class="key day-before"></i><span id="today-key">Day before</span></li>
+              <li><i class="key average"></i>Average</li>
+            </ul>
+          </div>
+          <div class="chart" id="zone-chart" role="img" aria-label="Hourly forecast for the selected price area, with the day before's actual prices"></div>
+          <details class="table-view">
+            <summary>Show every hour with its range</summary>
+            <div class="scroll-x"><table class="data-table" id="zone-table"></table></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="panel" id="all-areas" aria-labelledby="all-areas-title">
+        <div class="panel-head">
+          <h2 id="all-areas-title">All four areas, every hour</h2>
+          <p class="panel-meta">Forecast, SEK/kWh</p>
+        </div>
+        <div class="panel-body" id="timetable-body">
+          <div class="timetable-wrap"><table class="timetable" id="timetable"></table></div>
+          <div class="timetable-key">
+            <span class="ramp" aria-hidden="true">Cheaper
+              <i style="background:var(--p0)"></i><i style="background:var(--p1)"></i><i style="background:var(--p2)"></i><i style="background:var(--p3)"></i><i style="background:var(--p4)"></i><i style="background:var(--p5)"></i><i style="background:var(--p6)"></i>
+              Dearer</span>
+            <span class="cheap-key"><i aria-hidden="true"></i>The three cheapest hours in each area</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="accuracy" aria-labelledby="accuracy-title">
+        <div class="panel-head"><h2 id="accuracy-title">How accurate it is</h2></div>
+        <div class="panel-body">
+          <p class="claim" id="claim">Loading the backtest</p>
+          <p class="claim-support" id="claim-support"></p>
+          <table class="ranked" id="ranked"><caption class="visually-hidden">Average error per model</caption></table>
+          <p class="note" id="ranked-note"></p>
+          <div class="chart-head spaced">
             <h3>Average error by month, SEK/kWh</h3>
             <ul class="legend">
               <li><i class="key elmorgon"></i>Elmorgon</li>
               <li><i class="key day-before"></i>Same hour, day before</li>
             </ul>
-            <button type="button" class="disclose" id="monthly-toggle" aria-expanded="false" aria-controls="monthly-numbers">Show the numbers</button>
           </div>
           <div class="chart" id="monthly-chart" role="img" aria-label="Average forecast error by month for Elmorgon and for repeating the same hour of the day before"></div>
-          <div class="scroll-x" id="monthly-numbers" hidden><table class="data-table" id="monthly-table"></table></div>
+          <details class="table-view">
+            <summary>Show the numbers</summary>
+            <div class="scroll-x"><table class="data-table" id="monthly-table"></table></div>
+          </details>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="tomorrow" aria-labelledby="tomorrow-title">
-      <div class="wrap">
-        <div class="section-head">
-          <h2 id="tomorrow-title">The next day, hour by hour</h2>
-        </div>
-        <div id="tomorrow-body">
-          <div class="timetable-wrap">
-            <table class="timetable" id="timetable"></table>
-          </div>
-          <div class="timetable-key">
-            <span class="ramp" aria-hidden="true">Cheaper
-              <i style="background:var(--p0)"></i><i style="background:var(--p1)"></i><i style="background:var(--p2)"></i><i style="background:var(--p3)"></i><i style="background:var(--p4)"></i><i style="background:var(--p5)"></i><i style="background:var(--p6)"></i>
-              Dearer</span>
-            <span class="cheap-key"><i aria-hidden="true"></i>The three cheapest hours in each zone</span>
-            <span>Median forecast, SEK/kWh, for the hour starting at that time</span>
-          </div>
-
-          <div class="zone-detail">
-            <fieldset class="zone-picker" id="zone-picker">
-              <legend>Price areas, daily average in SEK/kWh</legend>
-              <div class="zone-head" aria-hidden="true">
-                <span>Area</span>
-                <span class="num" id="zone-head-actual">Actual</span>
-                <span class="num" id="zone-head-forecast">Forecast</span>
-              </div>
-            </fieldset>
-            <div>
-              <div class="chart-head">
-                <h3 id="zone-chart-title">Forecast range by hour</h3>
-                <ul class="legend">
-                  <li><i class="key band"></i>80% range</li>
-                  <li><i class="key elmorgon"></i>Median forecast</li>
-                  <li><i class="key day-before"></i><span id="today-key">Day before, actual price</span></li>
-                </ul>
-              </div>
-              <div class="chart" id="zone-chart" role="img" aria-label="Hourly forecast range for the selected zone, with today's actual prices"></div>
-              <details class="table-view">
-                <summary>Show every hour with its range</summary>
-                <div class="scroll-x"><table class="data-table" id="zone-table"></table></div>
-              </details>
+      <section class="panel" id="value" aria-labelledby="value-title">
+        <div class="panel-head"><h2 id="value-title">What a better forecast is worth</h2></div>
+        <div class="panel-body">
+          <p class="lede small">Each forecast becomes a plan, and the plan is paid for at the prices that actually cleared, for every day of the backtest in all four areas.</p>
+          <div class="value-grid">
+            <div class="value-block">
+              <h3>Charging an electric car</h3>
+              <p class="sub" id="ev-sub"></p>
+              <table class="ranked" id="ev-table"><caption class="visually-hidden">Average price paid for EV charging, by plan</caption></table>
+              <p class="value-sentence" id="ev-sentence"></p>
+            </div>
+            <div class="value-block">
+              <h3>Running a home battery</h3>
+              <p class="sub" id="bat-sub"></p>
+              <table class="ranked" id="bat-table"><caption class="visually-hidden">Yearly battery profit, by plan</caption></table>
+              <p class="value-sentence" id="bat-sentence"></p>
             </div>
           </div>
+          <details class="table-view">
+            <summary>Show each area</summary>
+            <div class="scroll-x"><table class="data-table" id="value-zone-table"></table></div>
+            <p class="note">EV paid is the average price per kWh. Saving and battery profit are in SEK a year.</p>
+          </details>
+        </div>
+      </section>
 
-          <div class="sources">
-            <h3>Where the information comes from</h3>
-            <dl>
-              <div>
-                <dt>Prices</dt>
-                <dd>Nord Pool day-ahead prices for the four Swedish price areas, collected from <a href="https://www.elprisetjustnu.se/">elprisetjustnu.se</a>, which converts them from euros to kronor. The market cleared hourly until 30 September 2025 and in 15-minute intervals since; the forecast is for the hourly average.</dd>
-              </div>
-              <div>
-                <dt>Weather</dt>
-                <dd>Forecasts of temperature, wind, sunshine and cloud cover at two places in each area, from <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0).</dd>
-              </div>
-              <div>
-                <dt>Forecast</dt>
-                <dd>Made by Elmorgon's own model, retrained every morning on all prices published so far. It is not a Nord Pool figure, and it is saved before the real prices exist.</dd>
-              </div>
-              <div>
-                <dt>Not included</dt>
-                <dd>Energy tax, VAT, electricity certificates, supplier surcharges and grid fees. Prices are rounded to two decimals, so totals can differ slightly.</dd>
-              </div>
-            </dl>
-          </div>
+      <section class="panel" id="record" aria-labelledby="record-title">
+        <div class="panel-head"><h2 id="record-title">Live record</h2></div>
+        <div class="panel-body">
+          <p class="lede small">A backtest can be tuned until it looks good. These forecasts were each saved before that day's prices were published and never changed afterwards.</p>
+          <p class="record-summary" id="record-summary"></p>
+          <div class="scroll-x"><table class="data-table" id="record-table"></table></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="value" aria-labelledby="value-title">
-      <div class="wrap">
-        <div class="section-head">
-          <h2 id="value-title">What a better forecast is worth</h2>
-          <p>Each forecast is turned into a plan, and the plan is paid for at the prices that actually cleared, for every day of the backtest in all four zones. Spot price only: grid fees, energy tax and VAT are left out.</p>
+      <section class="panel" id="built" aria-labelledby="built-title">
+        <div class="panel-head"><h2 id="built-title">How it's built</h2></div>
+        <div class="panel-body">
+          <ol class="steps" id="steps"></ol>
+          <p class="note">Python, DuckDB, dbt, Dagster, LightGBM, SciPy and pytest. The page is plain HTML, CSS and JavaScript reading one JSON file.</p>
+          <p class="links">
+            <a href="https://github.com/Shreesha2004/elmorgon">Source code on GitHub</a>
+            <a href="https://github.com/Shreesha2004/elmorgon#design-notes">Design and data-quality notes</a>
+            <a href="data/dashboard.json">The data behind this page (JSON)</a>
+          </p>
         </div>
-        <div class="value-grid">
-          <div class="value-block">
-            <h3>Charging an electric car</h3>
-            <p class="sub" id="ev-sub"></p>
-            <table class="ranked" id="ev-table"><caption class="visually-hidden">Average price paid for EV charging, by plan</caption></table>
-            <p class="value-sentence" id="ev-sentence"></p>
-          </div>
-          <div class="value-block">
-            <h3>Running a home battery</h3>
-            <p class="sub" id="bat-sub"></p>
-            <table class="ranked" id="bat-table"><caption class="visually-hidden">Yearly battery profit, by plan</caption></table>
-            <p class="value-sentence" id="bat-sentence"></p>
-          </div>
-        </div>
-        <div class="by-zone">
-          <h3>By zone, planning with Elmorgon</h3>
-          <div class="scroll-x"><table class="data-table" id="value-zone-table"></table></div>
-          <p class="table-note">EV paid is the average price per kWh. Saving and battery profit are in SEK a year.</p>
-        </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
-    <section id="record" aria-labelledby="record-title">
-      <div class="wrap">
-        <div class="section-head">
-          <h2 id="record-title">Live record</h2>
-          <p>A backtest can be tuned until it looks good. These forecasts were each saved before that day's prices were published and are never changed afterwards.</p>
-        </div>
-        <p class="record-summary" id="record-summary"></p>
-        <div class="scroll-x"><table class="data-table" id="record-table"></table></div>
+    <aside class="side" aria-label="Price areas and sources">
+      <div class="areas-block" id="areas-block">
+        <h2 class="side-title">Price areas</h2>
+        <div class="areas" id="areas"></div>
       </div>
-    </section>
 
-    <section id="built" aria-labelledby="built-title">
-      <div class="wrap">
-        <div class="section-head">
-          <h2 id="built-title">How it's built</h2>
-          <p>A daily pipeline, from raw API responses to this page. The same steps run on a laptop, in Dagster, or as a scheduled CI job.</p>
+      <section class="panel sources" aria-labelledby="sources-title">
+        <h2 class="panel-head" id="sources-title">Where the information comes from</h2>
+        <div class="panel-body">
+          <p><strong>Prices.</strong> Nord Pool day-ahead prices for the four Swedish price areas, collected from <a href="https://www.elprisetjustnu.se/">elprisetjustnu.se</a>, which converts them from euros to kronor. Hourly until 30 September 2025, 15-minute since; the forecast is for the hourly average.</p>
+          <p><strong>Weather.</strong> Temperature, wind, sunshine and cloud cover at two places in each area, from <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0).</p>
+          <p><strong>Forecast.</strong> Elmorgon's own model, retrained every morning on all prices published so far, and saved before the real prices exist. It is not a Nord Pool figure.</p>
+          <p><strong>Not included.</strong> Energy tax, VAT, electricity certificates, supplier surcharges and grid fees. Prices are rounded to two decimals.</p>
         </div>
-        <ol class="steps" id="steps"></ol>
-        <p class="stack">Python, DuckDB, dbt, Dagster, LightGBM, SciPy and pytest. The page itself is plain HTML, CSS and JavaScript reading one JSON file.</p>
-        <p class="links">
-          <a href="https://github.com/Shreesha2004/elmorgon">Source code on GitHub</a>
-          <a href="https://github.com/Shreesha2004/elmorgon#design-notes">Design and data-quality notes</a>
-          <a href="data/dashboard.json">The data behind this page (JSON)</a>
-        </p>
-      </div>
-    </section>
-  </main>
+      </section>
+    </aside>
+  </div>
 
   <footer>
     <div class="wrap">
       <p>Built by <strong>Shreesha Vamanjoor Balakrishnan</strong>, MSc Data Science student at Stockholm University. <a href="https://www.linkedin.com/in/shreesha-vamanjoor-balakrishnan-2b1221232/">LinkedIn</a> <a href="https://github.com/Shreesha2004">GitHub</a></p>
-      <p>Prices: Nord Pool day-ahead prices via <a href="https://www.elprisetjustnu.se/">elprisetjustnu.se</a>. Weather: <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0). Not advice on what to buy or when.</p>
+      <p>Prices: Nord Pool via <a href="https://www.elprisetjustnu.se/">elprisetjustnu.se</a>. Weather: <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0). Not advice on what to buy or when.</p>
       <p id="generated"></p>
     </div>
   </footer>
 
   <noscript><p class="wrap load-error">This page draws its tables and charts with JavaScript. The raw numbers are in <a href="data/dashboard.json">data/dashboard.json</a>.</p></noscript>
-  <script src="app.js?v=3" defer></script>
+  <script src="app.js?v=4" defer></script>
 </body>
 </html>
